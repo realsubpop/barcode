@@ -132,8 +132,10 @@ function displaySVG(fullUpc) {
     xPos += barWidth;
     svgString += `<rect x="${xPos}" y="30" width="${barWidth}" height="${barHeight}" fill="black" />`;
 
-    let svgData = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`; 
-    outputSVG.html(`<h2>SVG Output:</h2><a href="${svgData}" download="barcode.svg">${svgString}</a>`);
+    // Create a Blob from the SVG string
+    let svgBlob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+    let svgUrl = URL.createObjectURL(svgBlob);
+    outputSVG.html(`<h2>SVG Output:</h2><a href="${svgUrl}" download="barcode.svg">${svgString}</a>`);
 }
 
 function displayPNG(fullUpc) {
