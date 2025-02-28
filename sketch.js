@@ -82,7 +82,6 @@ function displaySVG(fullUpc) {
     };
     
     // Add the numbers at the bottom
-    let xPos = 10; // Reset xPos for text placement
     for (let i = 0; i < 12; i++) {
       svgString += `<text x="${xPos + barWidth * 3.5}" y="140" font-size="10">${fullUpc[i]}</text>`;
       xPos += barWidth * 7; // Adjust xPos for the next number
