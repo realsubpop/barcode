@@ -69,7 +69,7 @@ function displaySVG(fullUpc) {
   // Create download link (using Blob as before)
   let svgBlob = new Blob([svg.outerHTML], {type: "image/svg+xml;charset=utf-8"});
   let svgUrl = URL.createObjectURL(svgBlob);
-  outputSVG.html(`<h2>SVG Output:</h2><a href="<span class="math-inline">\{svgUrl\}" download\="barcode\.svg"\></span>{svg.outerHTML}</a>`);
+  outputSVG.html(`<h2>SVG Output:</h2><a href="${svgUrl}" download="barcode.svg">${svg.outerHTML}</a>`);
 }
 
 function displayPNG(fullUpc) {
