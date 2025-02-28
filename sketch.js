@@ -240,5 +240,18 @@ function displayPNG(fullUpc) {
     rect(xPos, 30, barWidth, barHeight);
 
     let pngImage = canvas.elt.toDataURL('image/png');
-    outputPNG.html(`<h2>PNG Output:</h2><img src="${pngImage}" download="barcode.png">`);
+
+    // Create a temporary link element
+    let downloadLink = document.createElement('a');
+    downloadLink.href = pngImage;
+    downloadLink.download = 'barcode.png';
+
+    // Programmatically click the link to trigger the download
+    downloadLink.click();
+
+    // Clean up (optional)
+    downloadLink.remove(); 
+
+    // Display the image as before
+    outputPNG.html(`<h2>PNG Output:</h2><img src="${pngImage}">`); 
 }
