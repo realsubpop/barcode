@@ -80,6 +80,13 @@ function displaySVG(fullUpc) {
         '8': '1001000',
         '9': '1110100',
     };
+    
+    // Add the numbers at the bottom
+    let xPos = 10; // Reset xPos for text placement
+    for (let i = 0; i < 12; i++) {
+      svgString += `<text x="${xPos + barWidth * 3.5}" y="140" font-size="10">${fullUpc[i]}</text>`;
+      xPos += barWidth * 7; // Adjust xPos for the next number
+    }
 
     // Guard bars
     svgString += `<rect x="${xPos}" y="30" width="${barWidth}" height="${barHeight}" fill="black" />`;
