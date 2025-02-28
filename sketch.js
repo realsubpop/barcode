@@ -12,6 +12,11 @@ function setup() {
   outputPNG = document.getElementById('barcodeDetails');
 
   generateButton.addEventListener('click', generateAndDisplay);
+  upcInput.addEventListener('keyup', (event) => {
+    if (event.key === 'Enter') {
+      generateAndDisplay();
+    }
+  });
 }
 
 function generateAndDisplay() {
