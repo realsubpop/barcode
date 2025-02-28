@@ -132,8 +132,8 @@ function displaySVG(fullUpc) {
     xPos += barWidth;
     svgString += `<rect x="${xPos}" y="30" width="${barWidth}" height="${barHeight}" fill="black" />`;
 
-    svgString += `</svg>`;
-    outputSVG.html(`<h2>SVG Output:</h2>${svgString}`);
+    let svgData = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`; 
+    outputSVG.html(`<h2>SVG Output:</h2><a href="${svgData}" download="barcode.svg">${svgString}</a>`);
 }
 
 function displayPNG(fullUpc) {
@@ -240,5 +240,5 @@ function displayPNG(fullUpc) {
     rect(xPos, 30, barWidth, barHeight);
 
     let pngImage = canvas.elt.toDataURL('image/png');
-    outputPNG.html(`<h2>PNG Output:</h2><img src="${pngImage}">`);
+    outputPNG.html(`<h2>PNG Output:</h2><img src="${pngImage}" download="barcode.png">`);
 }
