@@ -31,7 +31,23 @@ function generateAndDisplay() {
 
   displaySVG(fullUpc);
   displayPNG(fullUpc);
-  document.getElementById('barcodeSection').style.display = 'block'; 
+  document.getElementById('barcodeSection').style.display = 'block';
+  
+  // Clear previous UPC details if they exist
+  let existingDetails = document.getElementById('upcDetails');
+  if (existingDetails) {
+    existingDetails.remove();
+  }
+
+  // Just below 'Your Barcode', we need to just output the UPC+checksum
+  let upcDetails = document.createElement('div');
+  upcDetails.id = 'upcDetails'; // Set an ID for easy reference
+  upcDetails.textContent = `Full Barcode: ${fullUpc}`;
+  upcDetails.style.fontSize = '14px'; // Set smaller font size
+  
+  // Insert upcDetails right after the 'Your Barcode' element
+  let barcodeSection = document.getElementById('barcodeSection');
+  barcodeSection.insertBefore(upcDetails, barcodeSection.children[1]); // Adjust index as needed
 }
 
 function calculateChecksum(upc) {
