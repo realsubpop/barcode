@@ -6,6 +6,7 @@ let canvas;
 let batchInput;
 let batchGenerateButton;
 let batchBarcodeOutput;
+let exportFormatSelect;
 
 function setup() {
   noCanvas();
@@ -16,6 +17,7 @@ function setup() {
   batchInput = document.getElementById('batchInput');
   batchGenerateButton = document.getElementById('batchGenerateButton');
   batchBarcodeOutput = document.getElementById('batchBarcodeOutput');
+  exportFormatSelect = document.getElementById('exportFormat'); // Get the select element
 
   generateButton.addEventListener('click', generateAndDisplay);
   batchGenerateButton.addEventListener('click', generateBatchBarcodes);
@@ -40,19 +42,25 @@ function setup() {
 }
 
 function generateAndDisplay() {
-  let upc = upcInput.value; // Use .value property, not .value()
+  let upc = upcInput.value;
   if (upc.length !== 11 || !/^\d+$/.test(upc)) {
-      alert('Please enter an 11-digit numeric UPC.');
-      return;
+    alert('Please enter an 11-digit numeric UPC.');
+    return;
   }
 
   let checksum = calculateChecksum(upc);
   let fullUpc = upc + checksum;
 
-  displaySVG(fullUpc);
-  displayPNG(fullUpc);
+  const exportFormat = exportFormatSelect.value; // Get the selected format
+
+  if (exportFormat === 'svg') {
+    displaySVG(fullUpc);
+  } else if (exportFormat === 'png') {
+    displayPNG(fullUpc);
+  }
+
   document.getElementById('barcodeSection').style.display = 'block';
-  
+
   // Clear previous UPC details if they exist
   let existingDetails = document.getElementById('upcDetails');
   if (existingDetails) {
@@ -61,19 +69,20 @@ function generateAndDisplay() {
 
   // Just below 'Your Barcode', we need to just output the UPC+checksum
   let upcDetails = document.createElement('div');
-  upcDetails.id = 'upcDetails'; // Set an ID for easy reference
+  upcDetails.id = 'upcDetails';
   upcDetails.textContent = `Full Barcode: ${fullUpc}`;
-  upcDetails.style.fontSize = '14px'; // Set smaller font size
-  
+  upcDetails.style.fontSize = '14px';
+
   // Insert upcDetails right after the 'Your Barcode' element
   let barcodeSection = document.getElementById('barcodeSection');
-  barcodeSection.insertBefore(upcDetails, barcodeSection.children[1]); // Adjust index as needed
-
+  barcodeSection.insertBefore(upcDetails, barcodeSection.children[1]);
 }
 
 function generateBatchBarcodes() {
   const upcList = batchInput.value.split('\n').map(line => line.trim()).filter(line => line !== '');
-  batchBarcodeOutput.innerHTML = ''; // Clear previous barcodes
+  batchBarcodeOutput.innerHTML = '';
+
+  const exportFormat = exportFormatSelect.value; // Get the selected format
 
   upcList.forEach(upc => {
     if (upc.length !== 11 || !/^\d+$/.test(upc)) {
@@ -83,28 +92,31 @@ function generateBatchBarcodes() {
 
     let checksum = calculateChecksum(upc);
     let fullUpc = upc + checksum;
-    displayBatchBarcode(fullUpc);
+
+    if (exportFormat === 'svg') {
+      displayBatchBarcodeSVG(fullUpc);
+    } else if (exportFormat === 'png') {
+      displayBatchBarcodePNG(fullUpc);
+    }
   });
 
-  // Show the batch barcode section *after* adding the barcodes
-  document.getElementById('batchBarcodeSection').style.display = 'block'; 
+  document.getElementById('batchBarcodeSection').style.display = 'block';
   setTimeout(() => {
-    document.getElementById('batchBarcodeSection').style.display = 'block'; 
-  }, 0); 
+    document.getElementById('batchBarcodeSection').style.display = 'block';
+  }, 0);
 }
-
 
 function calculateChecksum(upc) {
   let sumOdd = 0;
   let sumEven = 0;
 
   for (let i = 0; i < 11; i++) {
-      let digit = parseInt(upc.charAt(i));
-      if (i % 2 === 0) {
-          sumOdd += digit;
-      } else {
-          sumEven += digit;
-      }
+    let digit = parseInt(upc.charAt(i));
+    if (i % 2 === 0) {
+      sumOdd += digit;
+    } else {
+      sumEven += digit;
+    }
   }
 
   let total = sumOdd * 3 + sumEven;
@@ -112,82 +124,84 @@ function calculateChecksum(upc) {
   return checksum;
 }
 
+
 function displaySVG(fullUpc) {
-// Clear previous output
-outputSVG.innerHTML = ''; // Clear the container first
+  // Clear previous output
+  outputSVG.innerHTML = ''; // Clear the container first
+  
+  // Create a new SVG element
+  let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); 
+  
+  // Generate the barcode using JsBarcode
+  JsBarcode(svg, fullUpc, {
+    format: "upc",
+    displayValue: true, // Show the barcode digits
+    fontSize: 16,
+    textPosition: "bottom", // Position the digits at the bottom
+    width: 2, // Adjust bar width as needed
+    height: 100, // Adjust bar height as needed
+    margin: 10 // Add margin around the barcode
+  });
+  
+  // Add the SVG element to the output container
+  outputSVG.appendChild(svg);
+  
+  // Create download link (using Blob)
+  let svgBlob = new Blob([svg.outerHTML], {type: "image/svg+xml;charset=utf-8"});
+  let svgUrl = URL.createObjectURL(svgBlob);
+  
+  // Create a download link element
+  let downloadLink = document.createElement('a');
+  downloadLink.href = svgUrl;
+  downloadLink.download = `UPC_${fullUpc}.svg`;
+  downloadLink.textContent = 'Download SVG'; // Add text to the link
+  downloadLink.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block'); // Add Tailwind classes
+  
+  // Add the download link to the output container
+  outputSVG.appendChild(downloadLink);
+  }
+  
+  function displayPNG(fullUpc) {
+  if (canvas) {
+    canvas.remove();
+  }
+  canvas = createCanvas(300, 150); // Adjust canvas size as needed
+  JsBarcode(canvas.elt, fullUpc, {
+    format: "upc",
+    displayValue: true,
+    fontSize: 16,
+    textPosition: "bottom",
+    width: 2,
+    height: 100,
+    margin: 10
+  });
+  
+  let pngImage = canvas.elt.toDataURL('image/png');
+  
+  // Clear previous output
+  outputPNG.innerHTML = '';
+  
+  // Create an image element
+  let img = document.createElement('img');
+  img.src = pngImage;
+  img.alt = 'Barcode';
+  
+  // Add the image to the output container
+  outputPNG.appendChild(img);
+  
+  // Create a download link element
+  let downloadLink = document.createElement('a');
+  downloadLink.href = pngImage;
+  downloadLink.download = `UPC_${fullUpc}.png`;
+  downloadLink.textContent = 'Download PNG';
+  downloadLink.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+  
+  // Add the download link to the output container
+  outputPNG.appendChild(downloadLink);
+  }
+  
 
-// Create a new SVG element
-let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); 
-
-// Generate the barcode using JsBarcode
-JsBarcode(svg, fullUpc, {
-  format: "upc",
-  displayValue: true, // Show the barcode digits
-  fontSize: 16,
-  textPosition: "bottom", // Position the digits at the bottom
-  width: 2, // Adjust bar width as needed
-  height: 100, // Adjust bar height as needed
-  margin: 10 // Add margin around the barcode
-});
-
-// Add the SVG element to the output container
-outputSVG.appendChild(svg);
-
-// Create download link (using Blob)
-let svgBlob = new Blob([svg.outerHTML], {type: "image/svg+xml;charset=utf-8"});
-let svgUrl = URL.createObjectURL(svgBlob);
-
-// Create a download link element
-let downloadLink = document.createElement('a');
-downloadLink.href = svgUrl;
-downloadLink.download = `UPC_${fullUpc}.svg`;
-downloadLink.textContent = 'Download SVG'; // Add text to the link
-downloadLink.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block'); // Add Tailwind classes
-
-// Add the download link to the output container
-outputSVG.appendChild(downloadLink);
-}
-
-function displayPNG(fullUpc) {
-if (canvas) {
-  canvas.remove();
-}
-canvas = createCanvas(300, 150); // Adjust canvas size as needed
-JsBarcode(canvas.elt, fullUpc, {
-  format: "upc",
-  displayValue: true,
-  fontSize: 16,
-  textPosition: "bottom",
-  width: 2,
-  height: 100,
-  margin: 10
-});
-
-let pngImage = canvas.elt.toDataURL('image/png');
-
-// Clear previous output
-outputPNG.innerHTML = '';
-
-// Create an image element
-let img = document.createElement('img');
-img.src = pngImage;
-img.alt = 'Barcode';
-
-// Add the image to the output container
-outputPNG.appendChild(img);
-
-// Create a download link element
-let downloadLink = document.createElement('a');
-downloadLink.href = pngImage;
-downloadLink.download = `UPC_${fullUpc}.png`;
-downloadLink.textContent = 'Download PNG';
-downloadLink.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
-
-// Add the download link to the output container
-outputPNG.appendChild(downloadLink);
-}
-
-function displayBatchBarcode(fullUpc) {
+function displayBatchBarcodeSVG(fullUpc) {
   let barcodeContainer = document.createElement('div');
   barcodeContainer.classList.add('mb-4', 'p-4', 'border', 'border-gray-300', 'rounded-md');
 
@@ -204,26 +218,28 @@ function displayBatchBarcode(fullUpc) {
   barcodeContainer.appendChild(svg);
 
   let upcText = document.createElement('p');
-  upcText.textContent = `Full Barcode: ${fullUpc}`;
-  upcText.classList.add('text-sm', 'mt-2');
+  upcText.textContent = `UPC-A: ${fullUpc}`;
+  upcText.classList.add('text-sm', 'mt-2', 'mb-4'); // Add margin-bottom to upcText
   barcodeContainer.appendChild(upcText);
 
-  // Add margin bottom to the upcText
-  upcText.style.marginBottom = '10px'; // Adjust the value as needed
-
-  // Create download link for SVG
-  let svgBlob = new Blob([svg.outerHTML], {type: "image/svg+xml;charset=utf-8"});
+  let svgBlob = new Blob([svg.outerHTML], { type: "image/svg+xml;charset=utf-8" });
   let svgUrl = URL.createObjectURL(svgBlob);
-  let downloadLinkSVG = document.createElement('a');
-  downloadLinkSVG.href = svgUrl;
-  downloadLinkSVG.download = `UPC_${fullUpc}.svg`;
-  downloadLinkSVG.textContent = 'Download SVG';
-  downloadLinkSVG.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-1', 'px-2', 'rounded', 'mr-2');
-  barcodeContainer.appendChild(downloadLinkSVG); // Add SVG download link
+  let downloadLink = document.createElement('a');
+  downloadLink.href = svgUrl;
+  downloadLink.download = `UPC_${fullUpc}.svg`;
+  downloadLink.textContent = 'Download SVG';
+  downloadLink.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-1', 'px-2', 'rounded');
+  barcodeContainer.appendChild(downloadLink);
 
-  // Create download link for PNG
+  batchBarcodeOutput.appendChild(barcodeContainer);
+}
+
+function displayBatchBarcodePNG(fullUpc) {
+  let barcodeContainer = document.createElement('div');
+  barcodeContainer.classList.add('mb-4', 'p-4', 'border', 'border-gray-300', 'rounded-md');
+
   if (!canvas) {
-    canvas = createCanvas(300, 150); // Create a new canvas if it doesn't exist
+    canvas = createCanvas(300, 150);
   }
   JsBarcode(canvas.elt, fullUpc, {
     format: "upc",
@@ -234,14 +250,24 @@ function displayBatchBarcode(fullUpc) {
     height: 100,
     margin: 10
   });
-
   let pngImage = canvas.elt.toDataURL('image/png');
-  let downloadLinkPNG = document.createElement('a');
-  downloadLinkPNG.href = pngImage;
-  downloadLinkPNG.download = `UPC_${fullUpc}.png`;
-  downloadLinkPNG.textContent = 'Download PNG';
-  downloadLinkPNG.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-1', 'px-2', 'rounded');
-  barcodeContainer.appendChild(downloadLinkPNG); // Add PNG download link
+
+  let img = document.createElement('img');
+  img.src = pngImage;
+  img.alt = 'Barcode';
+  barcodeContainer.appendChild(img);
+
+  let upcText = document.createElement('p');
+  upcText.textContent = `UPC-A: ${fullUpc}`;
+  upcText.classList.add('text-sm', 'mt-4');
+  barcodeContainer.appendChild(upcText);
+
+  let downloadLink = document.createElement('a');
+  downloadLink.href = pngImage;
+  downloadLink.download = `UPC_${fullUpc}.png`;
+  downloadLink.textContent = 'Download PNG';
+  downloadLink.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-1', 'px-2', 'rounded');
+  barcodeContainer.appendChild(downloadLink);
 
   batchBarcodeOutput.appendChild(barcodeContainer);
 }
