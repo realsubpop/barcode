@@ -96,7 +96,7 @@ function displaySVG(fullUpc) {
   // Create a download link element
   let downloadLink = document.createElement('a');
   downloadLink.href = svgUrl;
-  downloadLink.download = 'barcode.svg';
+  downloadLink.download = `UPC_${fullUpc}.svg`;
   downloadLink.textContent = 'Download SVG'; // Add text to the link
   downloadLink.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block'); // Add Tailwind classes
 
@@ -135,7 +135,7 @@ function displayPNG(fullUpc) {
   // Create a download link element
   let downloadLink = document.createElement('a');
   downloadLink.href = pngImage;
-  downloadLink.download = 'barcode.png';
+  downloadLink.download = `UPC_${fullUpc}.png`;
   downloadLink.textContent = 'Download PNG';
   downloadLink.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
 
