@@ -204,26 +204,44 @@ function displayBatchBarcode(fullUpc) {
   barcodeContainer.appendChild(svg);
 
   let upcText = document.createElement('p');
-  upcText.textContent = `UPC-A: ${fullUpc}`;
+  upcText.textContent = `Full Barcode: ${fullUpc}`;
   upcText.classList.add('text-sm', 'mt-2');
   barcodeContainer.appendChild(upcText);
 
-  let copyButton = document.createElement('button');
-  copyButton.textContent = 'Copy UPC';
-  copyButton.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-1', 'px-2', 'rounded', 'mr-2');
-  copyButton.addEventListener('click', () => {
-    navigator.clipboard.writeText(fullUpc);
-  });
-  barcodeContainer.appendChild(copyButton);
+  // Add margin bottom to the upcText
+  upcText.style.marginBottom = '10px'; // Adjust the value as needed
 
+  // Create download link for SVG
   let svgBlob = new Blob([svg.outerHTML], {type: "image/svg+xml;charset=utf-8"});
   let svgUrl = URL.createObjectURL(svgBlob);
-  let downloadLink = document.createElement('a');
-  downloadLink.href = svgUrl;
-  downloadLink.download = `UPC_${fullUpc}.svg`;
-  downloadLink.textContent = 'Download SVG';
-  downloadLink.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-1', 'px-2', 'rounded');
-  barcodeContainer.appendChild(downloadLink);
+  let downloadLinkSVG = document.createElement('a');
+  downloadLinkSVG.href = svgUrl;
+  downloadLinkSVG.download = `UPC_${fullUpc}.svg`;
+  downloadLinkSVG.textContent = 'Download SVG';
+  downloadLinkSVG.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-1', 'px-2', 'rounded', 'mr-2');
+  barcodeContainer.appendChild(downloadLinkSVG); // Add SVG download link
+
+  // Create download link for PNG
+  if (!canvas) {
+    canvas = createCanvas(300, 150); // Create a new canvas if it doesn't exist
+  }
+  JsBarcode(canvas.elt, fullUpc, {
+    format: "upc",
+    displayValue: true,
+    fontSize: 16,
+    textPosition: "bottom",
+    width: 2,
+    height: 100,
+    margin: 10
+  });
+
+  let pngImage = canvas.elt.toDataURL('image/png');
+  let downloadLinkPNG = document.createElement('a');
+  downloadLinkPNG.href = pngImage;
+  downloadLinkPNG.download = `UPC_${fullUpc}.png`;
+  downloadLinkPNG.textContent = 'Download PNG';
+  downloadLinkPNG.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-1', 'px-2', 'rounded');
+  barcodeContainer.appendChild(downloadLinkPNG); // Add PNG download link
 
   batchBarcodeOutput.appendChild(barcodeContainer);
 }
