@@ -63,7 +63,7 @@ function displaySVG(fullUpc) {
   JsBarcode(svg, fullUpc, {
     format: "upc",
     displayValue: true, // Show the barcode digits
-    fontSize: 10,
+    fontSize: 12,
     textPosition: "bottom", // Position the digits at the bottom
     width: 2, // Adjust bar width as needed
     height: 100, // Adjust bar height as needed
