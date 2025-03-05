@@ -93,17 +93,24 @@ function generateBatchBarcodes() {
       return;
     }
 
-    let checksum = calculateChecksum(upc);
-    let fullUpc = upc + checksum;
-
-    if (exportFormat === 'svg') {
-      displayBatchBarcodeSVG(fullUpc);
-    } else if (exportFormat === 'png') {
-      displayBatchBarcodePNG(fullUpc);
+    // Call the appropriate display function based on the export format
+    if (exportFormat === 'png') {
+      displayBatchBarcodePNG(upc); // Generate PNGs
     } else if (exportFormat === 'pdf') {
-      displayBatchBarcodePDF(fullUpc);
+      displayBatchBarcodePDF(upc); // Generate PDFs
+    } else if (exportFormat === 'svg') {
+      displayBatchBarcodeSVG(upc); // Generate SVGs
     }
   });
+
+  // Call the corresponding zip method after generating all barcodes
+  if (exportFormat === 'png') {
+    zipBatchPNGs(upcList); // Call the method to zip PNGs
+  } else if (exportFormat === 'pdf') {
+    zipBatchPDF(upcList); // Call the method to zip PDFs
+  } else if (exportFormat === 'svg') {
+    zipBatchSVG(upcList); // Call the method to zip SVGs
+  }
 
   document.getElementById('batchBarcodeSection').style.display = 'block';
   setTimeout(() => {
@@ -367,4 +374,157 @@ function displayBatchBarcodePDF(fullUpc) {
 
   // Append the download link to the output container
   batchBarcodeOutput.appendChild(pdfDownloadLink);
+}
+
+function zipBatchPNGs(upcList) {
+  const zip = new JSZip(); // Create a new JSZip instance
+  const pngPromises = []; // Array to hold promises for PNG generation
+
+  upcList.forEach(upc => {
+    let checksum = calculateChecksum(upc);
+    let fullUpc = upc + checksum;
+
+    // Generate the barcode image
+    if (canvas) {
+      canvas.remove();
+    }
+    canvas = createCanvas(300, 150); // Adjust canvas size as needed
+    JsBarcode(canvas.elt, fullUpc, {
+      format: "upc",
+      displayValue: true,
+      fontSize: 16,
+      textPosition: "bottom",
+      width: 2,
+      height: 100,
+      margin: 10
+    });
+
+    let pngImage = canvas.elt.toDataURL('image/png');
+
+    // Convert the PNG data URL to a Blob
+    pngPromises.push(fetch(pngImage)
+      .then(res => res.blob())
+      .then(blob => {
+        zip.file(`UPC_${fullUpc}.png`, blob); // Add the PNG blob to the zip
+      }));
+  });
+
+  // Wait for all PNGs to be added to the zip
+  Promise.all(pngPromises).then(() => {
+    zip.generateAsync({ type: "blob" }).then(content => {
+      // Create a download link for the zip file
+      const zipUrl = URL.createObjectURL(content);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = zipUrl;
+      downloadLink.download = 'Batch_UPC_Barcodes.zip';
+      downloadLink.textContent = 'Download ZIP';
+      downloadLink.classList.add('bg-blue-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+
+      // Append the download link to the output container
+      batchBarcodeOutput.appendChild(downloadLink); // Ensure this is the same container as other formats
+    });
+  });
+}
+
+function zipBatchSVG(upcList) {
+  const zip = new JSZip(); // Create a new JSZip instance
+  const svgPromises = []; // Array to hold promises for SVG generation
+
+  upcList.forEach(upc => {
+    let checksum = calculateChecksum(upc);
+    let fullUpc = upc + checksum;
+
+    // Generate the barcode SVG
+    let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    JsBarcode(svg, fullUpc, {
+      format: "upc",
+      displayValue: true,
+      fontSize: 16,
+      textPosition: "bottom",
+      width: 2,
+      height: 100,
+      margin: 10
+    });
+
+    // Convert the SVG to a Blob
+    svgPromises.push(new Promise((resolve) => {
+      const svgBlob = new Blob([svg.outerHTML], { type: "image/svg+xml;charset=utf-8" });
+      zip.file(`UPC_${fullUpc}.svg`, svgBlob); // Add the SVG blob to the zip
+      resolve();
+    }));
+  });
+
+  // Wait for all SVGs to be added to the zip
+  Promise.all(svgPromises).then(() => {
+    zip.generateAsync({ type: "blob" }).then(content => {
+      // Create a download link for the zip file
+      const zipUrl = URL.createObjectURL(content);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = zipUrl;
+      downloadLink.download = 'Batch_UPC_Barcodes.zip';
+      downloadLink.textContent = 'Download ZIP';
+      downloadLink.classList.add('bg-blue-500', 'hover:bg-green-700', 'text-whte', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+
+      // Append the download link to the output container
+      batchBarcodeOutput.appendChild(downloadLink);
+    });
+  });
+}
+
+function zipBatchPDF(upcList) {
+  const zip = new JSZip(); // Create a new JSZip instance
+  const pdfPromises = []; // Array to hold promises for PDF generation
+  const pdfDownloadLink = document.getElementById('pdfDownloadLink');
+  if (pdfDownloadLink) {
+    pdfDownloadLink.remove();
+  }
+
+  upcList.forEach(upc => {
+    let checksum = calculateChecksum(upc);
+    let fullUpc = upc + checksum;
+
+    // Generate the barcode image
+    if (canvas) {
+      canvas.remove();
+    }
+    canvas = createCanvas(300, 150); // Adjust canvas size as needed
+    JsBarcode(canvas.elt, fullUpc, {
+      format: "upc",
+      displayValue: true,
+      fontSize: 16,
+      textPosition: "bottom",
+      width: 2,
+      height: 100,
+      margin: 10
+    });
+
+    let pngImage = canvas.elt.toDataURL('image/png');
+
+    // Create a new PDF document
+    let pdf = new jspdf.jsPDF();
+    pdf.addImage(pngImage, 'PNG', 10, 10, 100, 50); // Add the image to the PDF
+
+    // Convert the PDF to a Blob and add it to the zip
+    pdfPromises.push(new Promise((resolve) => {
+      const pdfBlob = pdf.output('blob'); // Get the PDF as a Blob
+      zip.file(`UPC_${fullUpc}.pdf`, pdfBlob); // Add the PDF blob to the zip
+      resolve(); // Resolve the promise
+    }));
+  });
+
+  // Wait for all PDFs to be added to the zip
+  Promise.all(pdfPromises).then(() => {
+    zip.generateAsync({ type: "blob" }).then(content => {
+      // Create a download link for the zip file
+      const zipUrl = URL.createObjectURL(content);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = zipUrl;
+      downloadLink.download = 'Batch_UPC_Barcodes.zip';
+      downloadLink.textContent = 'Download ZIP';
+      downloadLink.classList.add('bg-blue-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+      downloadLink.id = 'pdfDownloadLink';
+      // Append the download link to the output container
+      batchBarcodeOutput.parentElement.appendChild(downloadLink); // Ensure this is the same container as other formats
+    });
+  });
 }
