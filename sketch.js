@@ -100,6 +100,8 @@ function generateBatchBarcodes() {
       displayBatchBarcodeSVG(fullUpc);
     } else if (exportFormat === 'png') {
       displayBatchBarcodePNG(fullUpc);
+    } else if (exportFormat === 'pdf') {
+      displayBatchBarcodePDF(fullUpc);
     }
   });
 
@@ -244,7 +246,7 @@ function displayPDF(fullUpc) {
   pdfDownloadLink.href = pdfUrl;
   pdfDownloadLink.download = `UPC_${fullUpc}.pdf`;
   pdfDownloadLink.textContent = 'Download PDF';
-  pdfDownloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+  pdfDownloadLink.classList.add('bg-blue-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
   outputPDF.appendChild(pdfDownloadLink);
 }
 
@@ -275,7 +277,7 @@ function displayBatchBarcodeSVG(fullUpc) {
   downloadLink.href = svgUrl;
   downloadLink.download = `UPC_${fullUpc}.svg`;
   downloadLink.textContent = 'Download SVG';
-  downloadLink.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-1', 'px-2', 'rounded');
+  downloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-1', 'px-2', 'rounded');
   barcodeContainer.appendChild(downloadLink);
 
   batchBarcodeOutput.appendChild(barcodeContainer);
@@ -306,15 +308,63 @@ function displayBatchBarcodePNG(fullUpc) {
 
   let upcText = document.createElement('p');
   upcText.textContent = `UPC-A: ${fullUpc}`;
-  upcText.classList.add('text-sm', 'mt-4');
+  upcText.classList.add('text-sm', 'mt-2', 'mb-4');
   barcodeContainer.appendChild(upcText);
 
   let downloadLink = document.createElement('a');
   downloadLink.href = pngImage;
   downloadLink.download = `UPC_${fullUpc}.png`;
   downloadLink.textContent = 'Download PNG';
-  downloadLink.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-1', 'px-2', 'rounded');
+  downloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-1', 'px-2', 'rounded');
   barcodeContainer.appendChild(downloadLink);
 
   batchBarcodeOutput.appendChild(barcodeContainer);
+}
+
+function displayBatchBarcodePDF(fullUpc) {
+  let pdf = new jspdf.jsPDF(); // Create a new PDF document
+
+  // Generate the barcode image
+  if (canvas) {
+    canvas.remove();
+  }
+  canvas = createCanvas(300, 150); // Adjust canvas size as needed
+  JsBarcode(canvas.elt, fullUpc, {
+    format: "upc",
+    displayValue: true,
+    fontSize: 16,
+    textPosition: "bottom",
+    width: 2,
+    height: 100, // This height is used for the barcode
+    margin: 10
+  });
+
+  let pngImage = canvas.elt.toDataURL('image/png');
+
+  // Create an image element to display on the web page
+  let img = document.createElement('img');
+  img.src = pngImage;
+  img.alt = 'Barcode';
+  batchBarcodeOutput.appendChild(img); // Append the image to the output
+
+  let upcText = document.createElement('p');
+  upcText.textContent = `UPC-A: ${fullUpc}`;
+  upcText.classList.add('text-sm', 'mt-2', 'mb-4');
+  batchBarcodeOutput.appendChild(upcText);
+
+  // Add the image to the PDF
+  pdf.addImage(img, 'PNG', 10, 10, 50, 25);
+
+  // Create PDF download link after all images are added
+  let pdfBlob = pdf.output('blob');
+  let pdfUrl = URL.createObjectURL(pdfBlob);
+
+  let pdfDownloadLink = document.createElement('a');
+  pdfDownloadLink.href = pdfUrl;
+  pdfDownloadLink.download = `UPC_${fullUpc}.pdf`;
+  pdfDownloadLink.textContent = 'Download PDF';
+  pdfDownloadLink.classList.add('bg-blue-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+
+  // Append the download link to the output container
+  batchBarcodeOutput.appendChild(pdfDownloadLink);
 }
