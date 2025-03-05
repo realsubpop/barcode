@@ -379,6 +379,10 @@ function displayBatchBarcodePDF(fullUpc) {
 function zipBatchPNGs(upcList) {
   const zip = new JSZip(); // Create a new JSZip instance
   const pngPromises = []; // Array to hold promises for PNG generation
+  const pdfDownloadLink = document.getElementById('pdfDownloadLink');
+  if (pdfDownloadLink) {
+    pdfDownloadLink.remove();
+  }
 
   upcList.forEach(upc => {
     let checksum = calculateChecksum(upc);
@@ -429,6 +433,10 @@ function zipBatchPNGs(upcList) {
 function zipBatchSVG(upcList) {
   const zip = new JSZip(); // Create a new JSZip instance
   const svgPromises = []; // Array to hold promises for SVG generation
+  const pdfDownloadLink = document.getElementById('pdfDownloadLink');
+  if (pdfDownloadLink) {
+    pdfDownloadLink.remove();
+  }
 
   upcList.forEach(upc => {
     let checksum = calculateChecksum(upc);
