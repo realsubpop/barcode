@@ -151,7 +151,8 @@ function displaySVG(fullUpc) {
     textPosition: "bottom", // Position the digits at the bottom
     width: 2, // Adjust bar width as needed
     height: 100, // Adjust bar height as needed
-    margin: 10 // Add margin around the barcode
+    margin: 10,
+    font: 'sans-serif'
   });
 
   // Add the SVG element to the output container
@@ -166,7 +167,7 @@ function displaySVG(fullUpc) {
   downloadLink.href = svgUrl;
   downloadLink.download = `UPC_${fullUpc}.svg`;
   downloadLink.textContent = 'Download SVG'; // Add text to the link
-  downloadLink.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block'); // Add Tailwind classes
+  downloadLink.classList.add('bg-blue-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block'); // Add Tailwind classes
 
   // Add the download link to the output container
   outputSVG.appendChild(downloadLink);
@@ -184,7 +185,8 @@ function displayPNG(fullUpc) {
     textPosition: "bottom",
     width: 2,
     height: 100,
-    margin: 10
+    margin: 10,
+    font: 'sans-serif'
   });
 
   let pngImage = canvas.elt.toDataURL('image/png');
@@ -205,7 +207,7 @@ function displayPNG(fullUpc) {
   downloadLink.href = pngImage;
   downloadLink.download = `UPC_${fullUpc}.png`;
   downloadLink.textContent = 'Download PNG';
-  downloadLink.classList.add('bg-green-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+  downloadLink.classList.add('bg-blue-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
 
   // Add the download link to the output container
   outputPNG.appendChild(downloadLink);
@@ -223,7 +225,8 @@ function displayPDF(fullUpc) {
     textPosition: "bottom",
     width: 2,
     height: 100,
-    margin: 10
+    margin: 10,
+    font: 'sans-serif'
   });
 
   let pngImage = canvas.elt.toDataURL('image/png');
@@ -253,7 +256,7 @@ function displayPDF(fullUpc) {
   pdfDownloadLink.href = pdfUrl;
   pdfDownloadLink.download = `UPC_${fullUpc}.pdf`;
   pdfDownloadLink.textContent = 'Download PDF';
-  pdfDownloadLink.classList.add('bg-blue-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+  pdfDownloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
   outputPDF.appendChild(pdfDownloadLink);
 }
 
@@ -269,7 +272,8 @@ function displayBatchBarcodeSVG(fullUpc) {
     textPosition: "bottom",
     width: 2,
     height: 100,
-    margin: 10
+    margin: 10,
+    font: 'sans-serif'
   });
   barcodeContainer.appendChild(svg);
 
@@ -304,7 +308,8 @@ function displayBatchBarcodePNG(fullUpc) {
     textPosition: "bottom",
     width: 2,
     height: 100,
-    margin: 10
+    margin: 10,
+    font: "sans-serif"
   });
   let pngImage = canvas.elt.toDataURL('image/png');
 
@@ -343,7 +348,8 @@ function displayBatchBarcodePDF(fullUpc) {
     textPosition: "bottom",
     width: 2,
     height: 100, // This height is used for the barcode
-    margin: 10
+    margin: 10,
+    font: "sans-serif"
   });
 
   let pngImage = canvas.elt.toDataURL('image/png');
@@ -370,7 +376,7 @@ function displayBatchBarcodePDF(fullUpc) {
   pdfDownloadLink.href = pdfUrl;
   pdfDownloadLink.download = `UPC_${fullUpc}.pdf`;
   pdfDownloadLink.textContent = 'Download PDF';
-  pdfDownloadLink.classList.add('bg-blue-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+  pdfDownloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
 
   // Append the download link to the output container
   batchBarcodeOutput.appendChild(pdfDownloadLink);
@@ -400,7 +406,8 @@ function zipBatchPNGs(upcList) {
       textPosition: "bottom",
       width: 2,
       height: 100,
-      margin: 10
+      margin: 10,
+      font: 'sans-serif'
     });
 
     let pngImage = canvas.elt.toDataURL('image/png');
@@ -422,7 +429,7 @@ function zipBatchPNGs(upcList) {
       downloadLink.href = zipUrl;
       downloadLink.download = 'Batch_UPC_Barcodes.zip';
       downloadLink.textContent = 'Download ZIP';
-      downloadLink.classList.add('bg-blue-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+      downloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
 
       // Append the download link to the output container
       batchBarcodeOutput.appendChild(downloadLink); // Ensure this is the same container as other formats
@@ -451,7 +458,8 @@ function zipBatchSVG(upcList) {
       textPosition: "bottom",
       width: 2,
       height: 100,
-      margin: 10
+      margin: 10,
+      font: 'sans-serif'
     });
 
     // Convert the SVG to a Blob
@@ -471,7 +479,7 @@ function zipBatchSVG(upcList) {
       downloadLink.href = zipUrl;
       downloadLink.download = 'Batch_UPC_Barcodes.zip';
       downloadLink.textContent = 'Download ZIP';
-      downloadLink.classList.add('bg-blue-500', 'hover:bg-green-700', 'text-whte', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+      downloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-whte', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
 
       // Append the download link to the output container
       batchBarcodeOutput.appendChild(downloadLink);
@@ -503,7 +511,8 @@ function zipBatchPDF(upcList) {
       textPosition: "bottom",
       width: 2,
       height: 100,
-      margin: 10
+      margin: 10,
+      font: 'sans-serif'
     });
 
     let pngImage = canvas.elt.toDataURL('image/png');
@@ -529,7 +538,7 @@ function zipBatchPDF(upcList) {
       downloadLink.href = zipUrl;
       downloadLink.download = 'Batch_UPC_Barcodes.zip';
       downloadLink.textContent = 'Download ZIP';
-      downloadLink.classList.add('bg-blue-500', 'hover:bg-green-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+      downloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
       downloadLink.id = 'pdfDownloadLink';
       // Append the download link to the output container
       batchBarcodeOutput.parentElement.appendChild(downloadLink); // Ensure this is the same container as other formats
