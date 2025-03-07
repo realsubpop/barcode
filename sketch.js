@@ -214,50 +214,48 @@ function displayPNG(fullUpc) {
 }
 
 function displayPDF(fullUpc) {
-  if (canvas) {
-    canvas.remove();
-  }
-  canvas = createCanvas(300, 150); // Adjust canvas size as needed
-  JsBarcode(canvas.elt, fullUpc, {
+  // Clear previous output
+  outputPDF.innerHTML = ''; // Clear the container first
+
+  // Create a new SVG element
+  let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+  // Generate the barcode using JsBarcode
+  JsBarcode(svg, fullUpc, {
     format: "upc",
-    displayValue: true,
+    displayValue: true, // Show the barcode digits
     fontSize: 16,
-    textPosition: "bottom",
-    width: 2,
-    height: 100,
+    textPosition: "bottom", // Position the digits at the bottom
+    width: 2, // Adjust bar width as needed
+    height: 100, // Adjust bar height as needed
     margin: 10,
     font: 'sans-serif'
   });
 
-  let pngImage = canvas.elt.toDataURL('image/png');
+  // Add the SVG element to the output container
+  outputPDF.appendChild(svg);
 
-  // Clear previous output
-  outputPDF.innerHTML = '';
+  // PDF Generation using svg2pdf
+  const pdf = new jspdf.jsPDF();
+  
+  // Convert SVG to PDF using svg2pdf
+  pdf.svg(svg, {
+      x: 0, // Adjust position
+      y: 0, // Adjust position
+      width: 50, // Adjust size
+      height: 25, // Adjust size
+  }).then(() => {
+      let pdfBlob = pdf.output('blob');
+      let pdfUrl = URL.createObjectURL(pdfBlob);
 
-  // Create an image element
-  let img = document.createElement('img');
-  img.src = pngImage;
-  img.alt = 'Barcode';
-
-  // Add the image to the output container
-  outputPDF.appendChild(img);
-
-  // PDF Generation
-  let pdf = new jspdf.jsPDF();
-
-  // Add the image to the PDF with calculated width and desired height
-  pdf.addImage(img, 'PNG', 10, 10, 50, 25);
-
-  // Create PDF download link
-  let pdfBlob = pdf.output('blob');
-  let pdfUrl = URL.createObjectURL(pdfBlob);
-
-  let pdfDownloadLink = document.createElement('a');
-  pdfDownloadLink.href = pdfUrl;
-  pdfDownloadLink.download = `UPC_${fullUpc}.pdf`;
-  pdfDownloadLink.textContent = 'Download PDF';
-  pdfDownloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
-  outputPDF.appendChild(pdfDownloadLink);
+      let pdfDownloadLink = document.createElement('a');
+      pdfDownloadLink.href = pdfUrl;
+      pdfDownloadLink.download = `UPC_${fullUpc}.pdf`;
+      pdfDownloadLink.textContent = 'Download PDF';
+      pdfDownloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+  
+      outputPDF.appendChild(pdfDownloadLink);
+    });
 }
 
 function displayBatchBarcodeSVG(fullUpc) {
@@ -334,52 +332,49 @@ function displayBatchBarcodePNG(fullUpc) {
 }
 
 function displayBatchBarcodePDF(fullUpc) {
-  let pdf = new jspdf.jsPDF(); // Create a new PDF document
+  let barcodeContainer = document.createElement('div');
+  barcodeContainer.classList.add('mb-4', 'p-4', 'border', 'border-gray-300', 'rounded-md');
 
-  // Generate the barcode image
-  if (canvas) {
-    canvas.remove();
-  }
-  canvas = createCanvas(300, 150); // Adjust canvas size as needed
-  JsBarcode(canvas.elt, fullUpc, {
+  let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  JsBarcode(svg, fullUpc, {
     format: "upc",
     displayValue: true,
     fontSize: 16,
     textPosition: "bottom",
     width: 2,
-    height: 100, // This height is used for the barcode
+    height: 100,
     margin: 10,
-    font: "sans-serif"
+    font: 'sans-serif'
   });
-
-  let pngImage = canvas.elt.toDataURL('image/png');
-
-  // Create an image element to display on the web page
-  let img = document.createElement('img');
-  img.src = pngImage;
-  img.alt = 'Barcode';
-  batchBarcodeOutput.appendChild(img); // Append the image to the output
+  barcodeContainer.appendChild(svg);
 
   let upcText = document.createElement('p');
   upcText.textContent = `UPC-A: ${fullUpc}`;
-  upcText.classList.add('text-sm', 'mt-2', 'mb-4');
-  batchBarcodeOutput.appendChild(upcText);
+  upcText.classList.add('text-sm', 'mt-2', 'mb-4'); // Add margin-bottom to upcText
+  barcodeContainer.appendChild(upcText);
 
-  // Add the image to the PDF
-  pdf.addImage(img, 'PNG', 10, 10, 50, 25);
+ // PDF Generation using svg2pdf
+  const pdf = new jspdf.jsPDF();
+  
+  // Convert SVG to PDF using svg2pdf
+  pdf.svg(svg, {
+    x: 0, // Adjust position
+    y: 0, // Adjust position
+    width: 50, // Adjust size
+    height: 25, // Adjust size
+  }).then(() => {
+    let pdfBlob = pdf.output('blob');
+    let pdfUrl = URL.createObjectURL(pdfBlob);
 
-  // Create PDF download link after all images are added
-  let pdfBlob = pdf.output('blob');
-  let pdfUrl = URL.createObjectURL(pdfBlob);
+    let pdfDownloadLink = document.createElement('a');
+    pdfDownloadLink.href = pdfUrl;
+    pdfDownloadLink.download = `UPC_${fullUpc}.pdf`;
+    pdfDownloadLink.textContent = 'Download PDF';
+    pdfDownloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+    barcodeContainer.appendChild(pdfDownloadLink);
+  });
 
-  let pdfDownloadLink = document.createElement('a');
-  pdfDownloadLink.href = pdfUrl;
-  pdfDownloadLink.download = `UPC_${fullUpc}.pdf`;
-  pdfDownloadLink.textContent = 'Download PDF';
-  pdfDownloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
-
-  // Append the download link to the output container
-  batchBarcodeOutput.appendChild(pdfDownloadLink);
+  batchBarcodeOutput.appendChild(barcodeContainer);
 }
 
 function zipBatchPNGs(upcList) {
@@ -479,7 +474,7 @@ function zipBatchSVG(upcList) {
       downloadLink.href = zipUrl;
       downloadLink.download = 'Batch_UPC_Barcodes.zip';
       downloadLink.textContent = 'Download ZIP';
-      downloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-whte', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
+      downloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
 
       // Append the download link to the output container
       batchBarcodeOutput.appendChild(downloadLink);
@@ -499,12 +494,9 @@ function zipBatchPDF(upcList) {
     let checksum = calculateChecksum(upc);
     let fullUpc = upc + checksum;
 
-    // Generate the barcode image
-    if (canvas) {
-      canvas.remove();
-    }
-    canvas = createCanvas(300, 150); // Adjust canvas size as needed
-    JsBarcode(canvas.elt, fullUpc, {
+    // Create an SVG element
+    let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    JsBarcode(svg, fullUpc, {
       format: "upc",
       displayValue: true,
       fontSize: 16,
@@ -515,17 +507,23 @@ function zipBatchPDF(upcList) {
       font: 'sans-serif'
     });
 
-    let pngImage = canvas.elt.toDataURL('image/png');
-
     // Create a new PDF document
     let pdf = new jspdf.jsPDF();
-    pdf.addImage(pngImage, 'PNG', 10, 10, 100, 50); // Add the image to the PDF
 
-    // Convert the PDF to a Blob and add it to the zip
     pdfPromises.push(new Promise((resolve) => {
-      const pdfBlob = pdf.output('blob'); // Get the PDF as a Blob
-      zip.file(`UPC_${fullUpc}.pdf`, pdfBlob); // Add the PDF blob to the zip
-      resolve(); // Resolve the promise
+
+    // Convert SVG to PDF using svg2pdf
+      pdf.svg(svg, {
+        x: 10, // Adjust position
+        y: 10, // Adjust position
+        width: 50, // Adjust size
+        height: 25, // Adjust size
+      }).then(() => {
+        // Convert the PDF to a Blob and add it to the zip
+        const pdfBlob = pdf.output('blob'); // Get the PDF as a Blob
+        zip.file(`UPC_${fullUpc}.pdf`, pdfBlob); // Add the PDF blob to the zip
+        resolve();
+      });
     }));
   });
 
@@ -539,9 +537,8 @@ function zipBatchPDF(upcList) {
       downloadLink.download = 'Batch_UPC_Barcodes.zip';
       downloadLink.textContent = 'Download ZIP';
       downloadLink.classList.add('bg-blue-500', 'hover:bg-blue-700', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-md', 'mt-4', 'inline-block');
-      downloadLink.id = 'pdfDownloadLink';
       // Append the download link to the output container
-      batchBarcodeOutput.parentElement.appendChild(downloadLink); // Ensure this is the same container as other formats
+      batchBarcodeOutput.appendChild(downloadLink); // Ensure this is the same container as other formats
     });
   });
 }
